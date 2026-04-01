@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAO VIET JOINT VENTURE BANK</title>
+
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            deep: '#020617',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            accent: '#3b82f6',
+                            neonBlue: '#0ea5e9',
+                            neonPurple: '#a855f7',
+                            neonGreen: '#10b981',
+                            neonCyan: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(30, 41, 59, 0.5);
+        }
+
+        .sidebar-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .sidebar-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border-right: 4px solid #3b82f6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* Animations */
+        .page-transition {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Table Styles */
+        .saas-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 4px;
+        }
+
+        .saas-table tr {
+            background: rgba(30, 41, 59, 0.2);
+            transition: all 0.2s;
+        }
+
+        .saas-table tr:hover {
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .saas-table td,
+        .saas-table th {
+            padding: 12px 16px;
+            font-size: 0.875rem;
+        }
+
+        .saas-table th {
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Essential fix for unreadable dropdowns on some browsers */
+        select option {
+            background-color: #020617;
+            /* Matches brand-deep */
+            color: #f8fafc;
+        }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+            padding-right: 2rem !important;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen w-full overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-brand-deep border-r border-brand-border flex flex-col z-50">
+        <div class="p-6 flex items-center gap-3">
+            <div class="bg-brand-accent p-2 rounded-lg"><i class="fas fa-bolt text-white"></i></div>
+            <h1 class="text-xl font-bold tracking-tight">LAO VIET JOINT VENTURE BANK</h1>
+        </div>
+
+        <nav class="flex-1 px-4 mt-4 space-y-1 overflow-y-auto">
+            <a href="javascript:void(0)" onclick="router.loadPage('dashboard')" id="nav-dashboard"
+                class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl transition-all group">
+                <i class="fas fa-chart-pie opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+            <a href="javascript:void(0)" onclick="router.loadPage('dept')" id="nav-dept"
+                class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all group">
+                <i class="fas fa-building opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Dept Summary</span>
+            </a>
+            <a href="javascript:void(0)" onclick="router.loadPage('category')" id="nav-category"
+                class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all group">
+                <i class="fas fa-tags opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Category Summary</span>
+            </a>
+            <a href="javascript:void(0)" onclick="router.loadPage('proposals')" id="nav-proposals"
+                class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all group">
+                <i class="fas fa-file-invoice-dollar opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Proposals</span>
+            </a>
+            <a href="javascript:void(0)" onclick="router.loadPage('items')" id="nav-items"
+                class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all group">
+                <i class="fas fa-cubes opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Item Summary</span>
+            </a>
+            <a href="javascript:void(0)" onclick="router.loadPage('spend')" id="nav-spend"
+                class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all group">
+                <i class="fas fa-receipt opacity-70 group-hover:opacity-100"></i>
+                <span class="font-medium text-sm">Spend Details</span>
+            </a>
+        </nav>
+
+        <div class="p-6 border-t border-brand-border">
+            <div class="p-4 bg-slate-900/50 rounded-2xl border border-brand-border flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-neonBlue to-brand-neonPurple"></div>
+                <div>
+                    <p class="text-xs font-bold">Adam Fox</p>
+                    <p class="text-[10px] text-slate-500">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+
+        <!-- Global Header with Filters -->
+        <header
+            class="bg-brand-deep border-b border-brand-border p-6 grid grid-cols-1 lg:grid-cols-4 gap-4 items-center z-40">
+            <div class="lg:col-span-1">
+                <h2 id="current-page-title" class="text-xl font-bold">Dashboard</h2>
+                <div class="flex items-center gap-2 text-[10px] text-slate-500">
+                    <span id="last-updated-text">Updating...</span>
+                    <span>•</span>
+                    <button onclick="automation.toggle()" id="refresh-toggle"
+                        class="text-brand-neonGreen font-bold flex items-center gap-1">
+                        <i class="fas fa-play text-[8px]"></i> AUTO-REFRESH ON
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="lg:col-span-2 flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-brand-border">
+                <!-- Global Filters -->
+                <div class="flex items-center gap-2 border-r border-brand-border pr-3">
+                    <i class="far fa-calendar text-slate-500 text-xs"></i>
+                    <select id="filter-date" onchange="router.refreshAll()"
+                        class="bg-transparent text-xs outline-none cursor-pointer">
+                        <option value="today">Today</option>
+                        <option value="week" selected>This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 border-r border-brand-border pr-3">
+                    <i class="fas fa-building text-slate-500 text-xs"></i>
+                    <select id="filter-dept" onchange="router.refreshAll()"
+                        class="bg-transparent text-xs outline-none cursor-pointer max-w-[120px]">
+                        <option value="all">Every Department</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-tag text-slate-500 text-xs"></i>
+                    <select id="filter-cat" onchange="router.refreshAll()"
+                        class="bg-transparent text-xs outline-none cursor-pointer">
+                        <option value="all">Every Category</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1 flex justify-end gap-3">
+                <button onclick="exporter.exportToExcel()"
+                    class="px-4 py-2 glass-card rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-800 transition-all">
+                    <i class="fas fa-file-excel text-brand-neonGreen"></i> EXPORT EXCEL
+                </button>
+                <button onclick="refreshCurrentPage()"
+                    class="p-2 glass-card rounded-lg text-brand-accent hover:rotate-180 transition-transform duration-500">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE CONTAINERS -->
+        <main id="app-container" class="flex-1 overflow-y-auto p-8 relative">
+
+            <!-- Global Loading Overlay -->
+            <div id="loading-overlay"
+                class="hidden absolute inset-0 bg-brand-deep/50 backdrop-blur-[2px] z-50 flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="spinner"></div>
+                    <span class="text-[10px] tracking-widest uppercase font-bold text-brand-accent">Syncing
+                        Ledger...</span>
+                </div>
+            </div>
+
+            <!-- Page 1: Dashboard -->
+            <div id="page-dashboard" class="page-container page-transition space-y-8">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 border-l-4 border-brand-neonBlue">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Spend</p>
+                        <h3 id="stat-spend" class="text-2xl font-bold tracking-tight">0</h3>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-brand-neonPurple">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Item Types</p>
+                        <h3 id="stat-items" class="text-2xl font-bold tracking-tight text-brand-neonPurple">0</h3>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-brand-neonCyan">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Quantity
+                        </p>
+                        <h3 id="stat-qty" class="text-2xl font-bold tracking-tight text-brand-neonCyan">0</h3>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-brand-neonGreen">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Sync Health</p>
+                        <h3 class="text-lg font-bold tracking-widest text-brand-neonGreen uppercase">SECURE</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 glass-card p-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Spend Flow</h4>
+                        <div class="h-64"><canvas id="dashboardTrendChart"></canvas></div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Spend Distribution
+                        </h4>
+                        <div class="h-64"><canvas id="dashboardCatChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card p-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Top Assets by Value
+                        </h4>
+                        <div class="h-64"><canvas id="dashboardItemsChart"></canvas></div>
+                    </div>
+                    <div class="glass-card p-6 overflow-hidden flex flex-col">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Recent Ledger Stream
+                        </h4>
+                        <div class="overflow-y-auto flex-1">
+                            <table class="saas-table">
+                                <tbody id="dashboardProposalsTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Category Summary -->
+            <div id="page-category" class="page-container hidden page-transition space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card p-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Spend Concentration
+                        </h4>
+                        <div class="h-80"><canvas id="catDistChart"></canvas></div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Category Breakdown
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="saas-table">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-center">Items</th>
+                                        <th class="text-center">Qty</th>
+                                        <th class="text-right">Total (VND)</th>
+                                        <th class="text-right">Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: Department Summary -->
+            <div id="page-dept" class="page-container hidden page-transition space-y-8">
+                <div class="glass-card p-6">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Departmental Performance
+                    </h4>
+                    <div class="h-80 mb-8"><canvas id="deptDistChart"></canvas></div>
+                    <div class="overflow-x-auto">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th class="text-center">Items</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-right">Amount (VND)</th>
+                                    <th class="text-right">Budget %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4: Proposals -->
+            <div id="page-proposals" class="page-container hidden page-transition space-y-8">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500">Proposal Registry</h4>
+                        <div class="text-[10px] text-slate-400">Showing latest entries</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="saas-table">
+                            <thead>
+                                <tr class="cursor-pointer">
+                                    <th>Code <i class="fas fa-sort ml-1 opacity-20"></i></th>
+                                    <th>Date <i class="fas fa-sort ml-1 opacity-20"></i></th>
+                                    <th>Department</th>
+                                    <th class="text-right">Total (VND) <i class="fas fa-sort ml-1 opacity-20"></i></th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="propTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 5: Item Summary -->
+            <div id="page-items" class="page-container hidden page-transition space-y-8">
+                <div class="glass-card p-6">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Asset Ranking</h4>
+                    <div class="h-64 mb-8"><canvas id="itemRankChart"></canvas></div>
+                    <div class="overflow-x-auto">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Category</th>
+                                    <th class="text-center">Buying Depts</th>
+                                    <th class="text-center">Total Qty</th>
+                                    <th class="text-right">Total Value (VND)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 6: Spend Details -->
+            <div id="page-spend" class="page-container hidden page-transition space-y-8 h-full flex flex-col">
+                <div class="glass-card p-6 flex flex-col flex-1 overflow-hidden">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">Forensic Spend Audit
+                    </h4>
+                    <div class="overflow-auto flex-1">
+                        <table class="saas-table">
+                            <thead class="sticky top-0 bg-brand-card z-10 shadow-lg">
+                                <tr>
+                                    <th>Ref ID</th>
+                                    <th>Date</th>
+                                    <th>Dept</th>
+                                    <th>Category</th>
+                                    <th>Item Description</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-right">Unit Price</th>
+                                    <th class="text-right">Total VND</th>
+                                </tr>
+                            </thead>
+                            <tbody id="spendTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPT SECTION -->
+    <script>
+        // --- DATA STATE ---
+        const cache = { dashboard: null, dept: null, category: null, proposals: null, items: null, spend: null };
+        const metadata = { depts: [], cats: [] };
+
+        // --- UTILS ---
+        const formatVND = num => new Intl.NumberFormat('en-US').format(Math.round(num)) + ' VND';
+        const formatDate = d => d ? new Date(d).toISOString().split('T')[0] : '---';
+        const setUI = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+        // --- NAVIGATION ROUTER ---
+        const router = {
+            currentPage: 'dashboard',
+            loadPage(page) {
+                console.log(`[Router] Switching to: ${page}`);
+                this.currentPage = page;
+
+                // UI Toggle
+                document.querySelectorAll('.page-container').forEach(p => p.classList.add('hidden'));
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+                document.getElementById(`page-${page}`).classList.remove('hidden');
+                document.getElementById(`nav-${page}`).classList.add('active');
+
+                const titleMap = { dashboard: 'Executive Dashboard', dept: 'Departmental Summary', category: 'Category Analysis', proposals: 'Proposal Registry', items: 'Asset Inventory', spend: 'Spend Forensic' };
+                document.getElementById('current-page-title').innerText = titleMap[page];
+
+                this.refreshCurrent();
+            },
+            async refreshCurrent() {
+                const loader = document.getElementById('loading-overlay');
+                loader.classList.remove('hidden');
+                try {
+                    switch (this.currentPage) {
+                        case 'dashboard': await managers.loadDashboard(); break;
+                        case 'category': await managers.loadCategory(); break;
+                        case 'dept': await managers.loadDepartment(); break;
+                        case 'proposals': await managers.loadProposals(); break;
+                        case 'items': await managers.loadItems(); break;
+                        case 'spend': await managers.loadSpend(); break;
+                    }
+                    setUI('last-updated-text', `Updated: ${new Date().toLocaleTimeString()}`);
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            },
+            refreshAll() { this.refreshCurrent(); }
+        };
+
+        // --- DATA MANAGERS ---
+        const managers = {
+            async loadDashboard() {
+                const data = await dataManager.fetch('dashboard');
+                if (!data) return;
+
+                setUI('stat-spend', formatVND(data.totals.total_spend));
+                setUI('stat-items', data.totals.total_items);
+                setUI('stat-qty', data.totals.total_quantity.toLocaleString());
+
+                charts.render('dashboardTrendChart', 'line', {
+                    labels: data.recent_proposals.map(p => p.document_number).reverse(),
+                    datasets: [{ label: 'Spend Trends', data: data.recent_proposals.map(p => p.total_amount).reverse(), borderColor: '#3b82f6', tension: 0.4 }]
+                });
+
+                charts.render('dashboardCatChart', 'doughnut', {
+                    labels: data.spend_by_category.map(c => c.category),
+                    datasets: [{ data: data.spend_by_category.map(c => c.total_amount), backgroundColor: ['#3b82f6', '#a855f7', '#10b981', '#06b6d4', '#f59e0b'] }]
+                });
+
+                charts.render('dashboardItemsChart', 'bar', {
+                    labels: data.top_items.map(i => i.item_name).slice(0, 5),
+                    datasets: [{ label: 'Market Value', data: data.top_items.map(i => i.total_amount).slice(0, 5), backgroundColor: '#0ea5e9' }]
+                });
+
+                const tbody = document.getElementById('dashboardProposalsTable');
+                tbody.innerHTML = data.recent_proposals.slice(0, 8).map(p => `
+                    <tr>
+                        <td class="font-bold text-brand-neonBlue uppercase text-xs">${p.document_number}</td>
+                        <td class="text-[10px] text-slate-400">${p.department}</td>
+                        <td class="text-right font-bold text-xs">${formatVND(p.total_amount)}</td>
+                    </tr>
+                `).join('');
+
+                // Populate Filters metadata
+                if (metadata.depts.length === 0) populateFilters(data.spend_by_department.map(d => d.department), data.spend_by_category.map(c => c.category));
+            },
+
+            async loadCategory() {
+                const data = await dataManager.fetch('category');
+                if (!data) return;
+
+                charts.render('catDistChart', 'bar', {
+                    labels: data.map(c => c.spend_category),
+                    datasets: [{ label: 'Category Spend', data: data.map(c => c.total_amount), backgroundColor: '#a855f7' }]
+                });
+
+                document.getElementById('catTableBody').innerHTML = data.map(row => `
+                    <tr>
+                        <td class="font-bold">${row.spend_category}</td>
+                        <td class="text-center font-mono">${row.item_count}</td>
+                        <td class="text-center font-mono text-slate-500">${row.total_quantity}</td>
+                        <td class="text-right font-bold">${formatVND(row.total_amount)}</td>
+                        <td class="text-right font-mono text-brand-neonPurple text-[10px]">${row.budget_share}%</td>
+                    </tr>
+                `).join('');
+            },
+
+            async loadDepartment() {
+                const data = await dataManager.fetch('dept');
+                if (!data) return;
+
+                charts.render('deptDistChart', 'bar', {
+                    labels: data.map(d => d.department),
+                    datasets: [{ label: 'Dept Allocation', data: data.map(d => d.total_amount), backgroundColor: '#10b981' }],
+                    options: { indexAxis: 'y' }
+                });
+
+                document.getElementById('deptTableBody').innerHTML = data.map(row => `
+                    <tr>
+                        <td class="font-bold">${row.department}</td>
+                        <td class="text-center">${row.item_count}</td>
+                        <td class="text-center text-slate-500">${row.total_quantity}</td>
+                        <td class="text-right font-bold">${formatVND(row.total_amount)}</td>
+                        <td class="text-right font-mono text-brand-neonGreen text-[10px]">${row.budget_share}%</td>
+                    </tr>
+                `).join('');
+            },
+
+            async loadProposals() {
+                const data = await dataManager.fetch('proposals');
+                if (!data) return;
+                document.getElementById('propTableBody').innerHTML = data.slice(0, 50).map(row => `
+                    <tr>
+                        <td class="font-bold text-brand-accent">${row.proposal_code || row.document_number}</td>
+                        <td class="text-[10px] text-slate-500">${formatDate(row.date)}</td>
+                        <td class="text-xs">${row.department}</td>
+                        <td class="text-right font-bold">${formatVND(row.planned_total || row.total_amount)}</td>
+                        <td><span class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-brand-neonGreen/20 text-brand-neonGreen">APPROVED</span></td>
+                    </tr>
+                `).join('');
+            },
+
+            async loadItems() {
+                const data = await dataManager.fetch('items');
+                if (!data) return;
+                charts.render('itemRankChart', 'bar', {
+                    labels: data.slice(0, 15).map(i => i.item_name),
+                    datasets: [{ label: 'Asset Value', data: data.slice(0, 15).map(i => i.total_amount), backgroundColor: '#06b6d4' }]
+                });
+                document.getElementById('itemTableBody').innerHTML = data.slice(0, 30).map(row => `
+                    <tr>
+                        <td class="font-bold text-xs">${row.item_name}</td>
+                        <td class="text-[10px] text-slate-500 uppercase tracking-tighter italic">${row.spend_category}</td>
+                        <td class="text-center text-xs font-bold text-brand-neonCyan">${row.departments_buying || 1}</td>
+                        <td class="text-center font-mono text-[10px]">${row.total_quantity}</td>
+                        <td class="text-right font-bold">${formatVND(row.total_amount)}</td>
+                    </tr>
+                `).join('');
+            },
+
+            async loadSpend() {
+                const data = await dataManager.fetch('spend');
+                if (!data) return;
+                document.getElementById('spendTableBody').innerHTML = data.slice(0, 100).map(row => `
+                    <tr>
+                        <td class="font-mono text-[9px] text-slate-500">${row.proposal_code || '---'}</td>
+                        <td class="text-[9px] text-slate-600">${formatDate(row.proposal_date)}</td>
+                        <td class="text-[10px] font-bold">${row.department}</td>
+                        <td class="text-[9px] text-brand-neonPurple uppercase">${row.spend_category}</td>
+                        <td class="text-xs font-bold truncate max-w-[200px]" title="${row.item_name}">${row.item_name}</td>
+                        <td class="text-center text-xs">${row.quantity}</td>
+                        <td class="text-right text-[10px] font-mono text-slate-500">${formatVND(row.unit_price)}</td>
+                        <td class="text-right font-bold text-gray-100">${formatVND(row.amount)}</td>
+                    </tr>
+                `).join('');
+            }
+        };
+
+        // --- DASHBOARD CORE ENGINE ---
+        const dataManager = {
+            endpoints: {
+                dashboard: 'https://rpa.foxai.com.vn/webhook/dashboard',
+                category: 'https://rpa.foxai.com.vn/webhook/spend-category-summary',
+                dept: 'https://rpa.foxai.com.vn/webhook/department-summary',
+                proposals: 'https://rpa.foxai.com.vn/webhook/proposals',
+                items: 'https://rpa.foxai.com.vn/webhook/item-summary',
+                spend: 'https://rpa.foxai.com.vn/webhook/spend-details'
+            },
+            async fetch(key) {
+                const params = new URLSearchParams({
+                    timeframe: document.getElementById('filter-date').value,
+                    dept: document.getElementById('filter-dept').value,
+                    cat: document.getElementById('filter-cat').value
+                });
+                try {
+                    console.log(`[API] Fetching ${key}...`);
+                    const res = await fetch(`${this.endpoints[key]}?${params.toString()}`);
+                    const data = await res.json();
+                    cache[key] = data;
+                    return data;
+                } catch (e) {
+                    console.error(`[API FAIL] ${key}:`, e);
+                    return null;
+                }
+            }
+        };
+
+        const charts = {
+            instances: {},
+            render(ctxId, type, data, options = {}) {
+                if (this.instances[ctxId]) this.instances[ctxId].destroy();
+                const ctx = document.getElementById(ctxId).getContext('2d');
+                this.instances[ctxId] = new Chart(ctx, {
+                    type: type,
+                    data: data,
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: type !== 'doughnut' ? {
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 9 } } },
+                            x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } }
+                        } : {},
+                        ...options
+                    }
+                });
+            }
+        };
+
+        const automation = {
+            interval: null,
+            active: true,
+            start() {
+                if (this.interval) clearInterval(this.interval);
+                this.interval = setInterval(() => { if (this.active) router.refreshCurrent(); }, 1800000);
+            },
+            toggle() {
+                this.active = !this.active;
+                const btn = document.getElementById('refresh-toggle');
+                btn.innerHTML = this.active ? '<i class="fas fa-play text-[8px]"></i> AUTO-REFRESH ON' : '<i class="fas fa-pause text-[8px]"></i> AUTO-REFRESH OFF';
+                btn.classList.toggle('text-brand-neonGreen', this.active);
+                btn.classList.toggle('text-red-500', !this.active);
+            }
+        };
+
+        const exporter = {
+            async exportToExcel() {
+                const loader = document.getElementById('loading-overlay');
+                loader.classList.remove('hidden');
+                console.log("[Exporter] Starting 6-Sheet Executive Export...");
+
+                try {
+                    const sheetMapping = {
+                        dashboard: "Dashboard Stats",
+                        proposals: "Proposals",
+                        items: "Item Summary",
+                        dept: "Department Summary",
+                        category: "Category Summary",
+                        spend: "Spend Details"
+                    };
+
+                    const wb = XLSX.utils.book_new();
+
+                    // Fetch all data in parallel
+                    const keys = Object.keys(sheetMapping);
+                    const results = await Promise.all(keys.map(key => dataManager.fetch(key)));
+
+                    keys.forEach((key, index) => {
+                        const data = results[index];
+                        if (data) {
+                            const rows = Array.isArray(data) ? data : [data];
+                            const ws = XLSX.utils.json_to_sheet(rows);
+                            XLSX.utils.book_append_sheet(wb, ws, sheetMapping[key]);
+                        }
+                    });
+
+                    const fileName = `Antigravity_Executive_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    XLSX.writeFile(wb, fileName);
+                    console.log(`[Exporter] Export Complete: ${fileName}`);
+                } catch (e) {
+                    console.error("[Exporter] Critical Failure:", e);
+                    alert("Export failed. Please check console for details.");
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }
+        };
+
+        const populateFilters = (depts, cats) => {
+            const d = document.getElementById('filter-dept');
+            const c = document.getElementById('filter-cat');
+            depts.forEach(dept => d.innerHTML += `<option value="${dept}">${dept}</option>`);
+            cats.forEach(cat => c.innerHTML += `<option value="${cat}">${cat}</option>`);
+            metadata.depts = depts;
+            metadata.cats = cats;
+        };
+
+        function refreshCurrentPage() { router.refreshCurrent(); }
+
+        // --- INIT ---
+        window.onload = () => {
+            router.loadPage('dashboard');
+            automation.start();
+        };
+    </script>
+</body>
+
+</html>
